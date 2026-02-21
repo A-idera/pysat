@@ -1016,6 +1016,10 @@ static int *parse_dimacs_file(const char *fname, int *out_count)
 
 	int capacity = 65536;
 	int *lits = (int *)malloc(capacity * sizeof(int));
+	if (!lits) {
+		fclose(fp);
+		return NULL;
+	}
 	int n = 0;
 
 	char buf[16384];
@@ -1033,7 +1037,13 @@ static int *parse_dimacs_file(const char *fname, int *out_count)
 
 			if (n >= capacity) {
 				capacity *= 2;
-				lits = (int *)realloc(lits, capacity * sizeof(int));
+				int *temp = (int *)realloc(lits, capacity * sizeof(int));
+				if (!temp) {
+					free(lits);
+					fclose(fp);
+					return NULL;
+				}
+				lits = temp;
 			}
 			lits[n++] = (int)l;
 		}
