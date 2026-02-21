@@ -1356,6 +1356,47 @@ class Solver(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            This method adds multiple clauses to the solver at once, which
+            is more efficient than adding them one by one using
+            :meth:`add_clause`.
+
+            :param clauses: an iterable of clauses (each an iterable of ints).
+            :type clauses: iterable(iterable(int))
+
+            .. code-block:: python
+
+                >>> s = Solver()
+                >>> s.add_clauses([[-1, 2], [-1, -2], [1]])
+        """
+
+        if self.solver:
+            self.solver.add_clauses(clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file into the solver.
+            This bypasses Python-level parsing for better performance on
+            large instances.
+
+            :param fname: path to a DIMACS CNF file.
+            :type fname: str
+
+            Example:
+
+            .. code-block:: python
+
+                >>> from pysat.solvers import Solver
+                >>> s = Solver(name='cadical195')
+                >>> s.from_file('instance.cnf')
+                >>> if s.solve():
+                ...     print(s.get_model())
+        """
+
+        if self.solver:
+            self.solver.from_file(fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             This method is responsible for adding a new *native* AtMostK (see
@@ -1821,6 +1862,22 @@ class Cadical103(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.cadical:
+            pysolvers.cadical103_add_cls(self.cadical, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.cadical:
+            pysolvers.cadical103_from_file(self.cadical, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by CaDiCaL.
@@ -1841,18 +1898,19 @@ class Cadical103(object):
         """
 
         if self.cadical:
-            res = None
-
             if type(formula) == CNFPlus and formula.atmosts:
                 raise NotImplementedError('Atmost constraints are not supported by CaDiCaL')
 
-            for clause in formula:
-                res = self.add_clause(clause, no_return)
+            if no_return:
+                pysolvers.cadical103_add_cls(self.cadical, formula)
+            else:
+                res = None
+                for clause in formula:
+                    res = self.add_clause(clause, no_return)
 
-                if not no_return and res == False:
-                    return res
+                    if res == False:
+                        return res
 
-            if not no_return:
                 return res
 
     def supports_atmost(self):
@@ -2215,6 +2273,22 @@ class Cadical153(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.cadical:
+            pysolvers.cadical153_add_cls(self.cadical, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.cadical:
+            pysolvers.cadical153_from_file(self.cadical, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by CaDiCaL.
@@ -2235,18 +2309,19 @@ class Cadical153(object):
         """
 
         if self.cadical:
-            res = None
-
             if type(formula) == CNFPlus and formula.atmosts:
                 raise NotImplementedError('Atmost constraints are not supported by CaDiCaL')
 
-            for clause in formula:
-                res = self.add_clause(clause, no_return)
+            if no_return:
+                pysolvers.cadical153_add_cls(self.cadical, formula)
+            else:
+                res = None
+                for clause in formula:
+                    res = self.add_clause(clause, no_return)
 
-                if not no_return and res == False:
-                    return res
+                    if res == False:
+                        return res
 
-            if not no_return:
                 return res
 
     def supports_atmost(self):
@@ -2646,6 +2721,22 @@ class Cadical195(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.cadical:
+            pysolvers.cadical195_add_cls(self.cadical, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.cadical:
+            pysolvers.cadical195_from_file(self.cadical, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             This method is responsible for adding a new *native* AtMostK (see
@@ -2679,6 +2770,10 @@ class Cadical195(object):
             if type(formula) == CNFPlus and formula.atmosts:
                 if not self.supports_atmost():
                     raise NotImplementedError('Native atmost constraints are currently disabled')
+
+            if no_return and not (type(formula) == CNFPlus and formula.atmosts):
+                pysolvers.cadical195_add_cls(self.cadical, formula)
+                return
 
             for clause in formula:
                 if len(clause) != 2 or isinstance(clause[0], int):  # it is a clause
@@ -3080,6 +3175,22 @@ class Gluecard3(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.gluecard:
+            pysolvers.gluecard3_add_cls(self.gluecard, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.gluecard:
+            pysolvers.gluecard3_from_file(self.gluecard, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by Gluecard.
@@ -3110,6 +3221,10 @@ class Gluecard3(object):
 
         if self.gluecard:
             res = None
+
+            if no_return and not (type(formula) == CNFPlus and formula.atmosts):
+                pysolvers.gluecard3_add_cls(self.gluecard, formula)
+                return
 
             # this loop should work for a list of clauses, CNF, and CNFPlus
             for clause in formula:
@@ -3438,6 +3553,22 @@ class Gluecard4(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.gluecard:
+            pysolvers.gluecard41_add_cls(self.gluecard, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.gluecard:
+            pysolvers.gluecard41_from_file(self.gluecard, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by Gluecard.
@@ -3468,6 +3599,10 @@ class Gluecard4(object):
 
         if self.gluecard:
             res = None
+
+            if no_return and not (type(formula) == CNFPlus and formula.atmosts):
+                pysolvers.gluecard41_add_cls(self.gluecard, formula)
+                return
 
             # this loop should work for a list of clauses, CNF, and CNFPlus
             for clause in formula:
@@ -3794,6 +3929,22 @@ class Glucose3(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.glucose:
+            pysolvers.glucose3_add_cls(self.glucose, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.glucose:
+            pysolvers.glucose3_from_file(self.glucose, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by Glucose.
@@ -3814,11 +3965,14 @@ class Glucose3(object):
         """
 
         if self.glucose:
-            res = None
-
             if type(formula) == CNFPlus and formula.atmosts:
                 raise NotImplementedError('Atmost constraints are not supported by Glucose3')
 
+            if no_return:
+                pysolvers.glucose3_add_cls(self.glucose, formula)
+                return
+
+            res = None
             for clause in formula:
                 res = self.add_clause(clause, no_return)
 
@@ -4138,6 +4292,22 @@ class Glucose4(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.glucose:
+            pysolvers.glucose41_add_cls(self.glucose, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.glucose:
+            pysolvers.glucose41_from_file(self.glucose, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by Glucose.
@@ -4158,11 +4328,14 @@ class Glucose4(object):
         """
 
         if self.glucose:
-            res = None
-
             if type(formula) == CNFPlus and formula.atmosts:
                 raise NotImplementedError('Atmost constraints are not supported by Glucose4')
 
+            if no_return:
+                pysolvers.glucose41_add_cls(self.glucose, formula)
+                return
+
+            res = None
             for clause in formula:
                 res = self.add_clause(clause, no_return)
 
@@ -4570,6 +4743,22 @@ class Glucose42(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.glucose:
+            pysolvers.glucose421_add_cls(self.glucose, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.glucose:
+            pysolvers.glucose421_from_file(self.glucose, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by Glucose.
@@ -4590,11 +4779,14 @@ class Glucose42(object):
         """
 
         if self.glucose:
-            res = None
-
             if type(formula) == CNFPlus and formula.atmosts:
                 raise NotImplementedError('Atmost constraints are not supported by Glucose4')
 
+            if no_return:
+                pysolvers.glucose421_add_cls(self.glucose, formula)
+                return
+
+            res = None
             for clause in formula:
                 res = self.add_clause(clause, no_return)
 
@@ -4880,6 +5072,22 @@ class Lingeling(object):
         if self.lingeling:
             pysolvers.lingeling_add_cl(self.lingeling, clause)
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.lingeling:
+            pysolvers.lingeling_add_cls(self.lingeling, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.lingeling:
+            pysolvers.lingeling_from_file(self.lingeling, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by Lingeling.
@@ -4903,8 +5111,11 @@ class Lingeling(object):
             if type(formula) == CNFPlus and formula.atmosts:
                 raise NotImplementedError('Atmost constraints are not supported by Lingeling')
 
-            for clause in formula:
-                self.add_clause(clause, no_return)
+            if no_return:
+                pysolvers.lingeling_add_cls(self.lingeling, formula)
+            else:
+                for clause in formula:
+                    self.add_clause(clause, no_return)
 
     def supports_atmost(self):
         """
@@ -5212,6 +5423,22 @@ class MapleChrono(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.maplesat:
+            pysolvers.maplechrono_add_cls(self.maplesat, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.maplesat:
+            pysolvers.maplechrono_from_file(self.maplesat, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by MapleChrono.
@@ -5232,11 +5459,14 @@ class MapleChrono(object):
         """
 
         if self.maplesat:
-            res = None
-
             if type(formula) == CNFPlus and formula.atmosts:
                 raise NotImplementedError('Atmost constraints are not supported by MapleChrono')
 
+            if no_return:
+                pysolvers.maplechrono_add_cls(self.maplesat, formula)
+                return
+
+            res = None
             for clause in formula:
                 res = self.add_clause(clause, no_return)
 
@@ -5554,6 +5784,22 @@ class MapleCM(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.maplesat:
+            pysolvers.maplecm_add_cls(self.maplesat, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.maplesat:
+            pysolvers.maplecm_from_file(self.maplesat, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by MapleCM.
@@ -5574,11 +5820,14 @@ class MapleCM(object):
         """
 
         if self.maplesat:
-            res = None
-
             if type(formula) == CNFPlus and formula.atmosts:
                 raise NotImplementedError('Atmost constraints are not supported by MapleCM')
 
+            if no_return:
+                pysolvers.maplecm_add_cls(self.maplesat, formula)
+                return
+
+            res = None
             for clause in formula:
                 res = self.add_clause(clause, no_return)
 
@@ -5896,6 +6145,22 @@ class Maplesat(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.maplesat:
+            pysolvers.maplesat_add_cls(self.maplesat, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.maplesat:
+            pysolvers.maplesat_from_file(self.maplesat, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by Maplesat.
@@ -5916,11 +6181,14 @@ class Maplesat(object):
         """
 
         if self.maplesat:
-            res = None
-
             if type(formula) == CNFPlus and formula.atmosts:
                 raise NotImplementedError('Atmost constraints are not supported by Maplesat')
 
+            if no_return:
+                pysolvers.maplesat_add_cls(self.maplesat, formula)
+                return
+
+            res = None
             for clause in formula:
                 res = self.add_clause(clause, no_return)
 
@@ -6219,6 +6487,22 @@ class Mergesat3(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.mergesat:
+            pysolvers.mergesat3_add_cls(self.mergesat, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.mergesat:
+            pysolvers.mergesat3_from_file(self.mergesat, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by Mergesat3.
@@ -6239,11 +6523,14 @@ class Mergesat3(object):
         """
 
         if self.mergesat:
-            res = None
-
             if type(formula) == CNFPlus and formula.atmosts:
                 raise NotImplementedError('Atmost constraints are not supported by Mergesat3')
 
+            if no_return:
+                pysolvers.mergesat3_add_cls(self.mergesat, formula)
+                return
+
+            res = None
             for clause in formula:
                 res = self.add_clause(clause, no_return)
 
@@ -6555,6 +6842,22 @@ class Minicard(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.minicard:
+            pysolvers.minicard_add_cls(self.minicard, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.minicard:
+            pysolvers.minicard_from_file(self.minicard, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Add a new atmost constraint to solver's internal formula.
@@ -6585,6 +6888,10 @@ class Minicard(object):
 
         if self.minicard:
             res = None
+
+            if no_return and not (type(formula) == CNFPlus and formula.atmosts):
+                pysolvers.minicard_add_cls(self.minicard, formula)
+                return
 
             # this loop should work for a list of clauses, CNF, and CNFPlus
             for clause in formula:
@@ -6901,6 +7208,22 @@ class Minisat22(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.minisat:
+            pysolvers.minisat22_add_cls(self.minisat, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.minisat:
+            pysolvers.minisat22_from_file(self.minisat, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by MiniSat.
@@ -6921,11 +7244,14 @@ class Minisat22(object):
         """
 
         if self.minisat:
-            res = None
-
             if type(formula) == CNFPlus and formula.atmosts:
                 raise NotImplementedError('Atmost constraints are not supported by MiniSat')
 
+            if no_return:
+                pysolvers.minisat22_add_cls(self.minisat, formula)
+                return
+
+            res = None
             for clause in formula:
                 res = self.add_clause(clause, no_return)
 
@@ -7235,6 +7561,22 @@ class MinisatGH(object):
             if not no_return:
                 return res
 
+    def add_clauses(self, clauses):
+        """
+            Add multiple clauses to solver's internal formula at once.
+        """
+
+        if self.minisat:
+            pysolvers.minisatgh_add_cls(self.minisat, clauses)
+
+    def from_file(self, fname):
+        """
+            Load clauses directly from a DIMACS CNF file.
+        """
+
+        if self.minisat:
+            pysolvers.minisatgh_from_file(self.minisat, fname)
+
     def add_atmost(self, lits, k, weights=[], no_return=True):
         """
             Atmost constraints are not supported by MiniSat.
@@ -7255,11 +7597,14 @@ class MinisatGH(object):
         """
 
         if self.minisat:
-            res = None
-
             if type(formula) == CNFPlus and formula.atmosts:
                 raise NotImplementedError('Atmost constraints are not supported by MiniSat')
 
+            if no_return:
+                pysolvers.minisatgh_add_cls(self.minisat, formula)
+                return
+
+            res = None
             for clause in formula:
                 res = self.add_clause(clause, no_return)
 

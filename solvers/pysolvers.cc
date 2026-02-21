@@ -94,6 +94,8 @@ static char       set_docstring[] = "Set a value of a solver's parameter "
 static char     addcl_docstring[] = "Add a clause to formula.";
 static char     addam_docstring[] = "Add an atmost constraint to formula "
                                     "(for Minicard only).";
+static char    addcls_docstring[] = "Add a list of clauses to the solver.";
+static char  fromfile_docstring[] = "Load clauses directly from a DIMACS CNF file.";
 static char     solve_docstring[] = "Solve a given CNF instance.";
 static char       lim_docstring[] = "Solve a given CNF instance within a budget.";
 static char   process_docstring[] = "(Pre)process a given CNF formula using "
@@ -159,6 +161,8 @@ extern "C" {
 #ifdef WITH_CADICAL103
 	static PyObject *py_cadical103_new       (PyObject *, PyObject *);
 	static PyObject *py_cadical103_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_cadical103_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_cadical103_from_file (PyObject *, PyObject *);
 	static PyObject *py_cadical103_solve     (PyObject *, PyObject *);
 	static PyObject *py_cadical103_solve_lim (PyObject *, PyObject *);
 	static PyObject *py_cadical103_cbudget   (PyObject *, PyObject *);
@@ -175,6 +179,8 @@ extern "C" {
 	static PyObject *py_cadical153_new       (PyObject *, PyObject *);
 	static PyObject *py_cadical153_set       (PyObject *, PyObject *);
 	static PyObject *py_cadical153_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_cadical153_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_cadical153_from_file (PyObject *, PyObject *);
 	static PyObject *py_cadical153_process   (PyObject *, PyObject *);
 	static PyObject *py_cadical153_restore   (PyObject *, PyObject *);
 	static PyObject *py_cadical153_solve     (PyObject *, PyObject *);
@@ -195,6 +201,8 @@ extern "C" {
 	static PyObject *py_cadical195_new       (PyObject *, PyObject *);
 	static PyObject *py_cadical195_set       (PyObject *, PyObject *);
 	static PyObject *py_cadical195_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_cadical195_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_cadical195_from_file (PyObject *, PyObject *);
 	static PyObject *py_cadical195_process   (PyObject *, PyObject *);
 	static PyObject *py_cadical195_restore   (PyObject *, PyObject *);
 	static PyObject *py_cadical195_solve     (PyObject *, PyObject *);
@@ -224,6 +232,8 @@ extern "C" {
 	static PyObject *py_gluecard3_new       (PyObject *, PyObject *);
 	static PyObject *py_gluecard3_set_start (PyObject *, PyObject *);
 	static PyObject *py_gluecard3_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_gluecard3_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_gluecard3_from_file (PyObject *, PyObject *);
 	static PyObject *py_gluecard3_add_am    (PyObject *, PyObject *);
 	static PyObject *py_gluecard3_solve     (PyObject *, PyObject *);
 	static PyObject *py_gluecard3_solve_lim (PyObject *, PyObject *);
@@ -246,6 +256,8 @@ extern "C" {
 	static PyObject *py_gluecard41_new       (PyObject *, PyObject *);
 	static PyObject *py_gluecard41_set_start (PyObject *, PyObject *);
 	static PyObject *py_gluecard41_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_gluecard41_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_gluecard41_from_file (PyObject *, PyObject *);
 	static PyObject *py_gluecard41_add_am    (PyObject *, PyObject *);
 	static PyObject *py_gluecard41_solve     (PyObject *, PyObject *);
 	static PyObject *py_gluecard41_solve_lim (PyObject *, PyObject *);
@@ -268,6 +280,8 @@ extern "C" {
 	static PyObject *py_glucose3_new       (PyObject *, PyObject *);
 	static PyObject *py_glucose3_set_start (PyObject *, PyObject *);
 	static PyObject *py_glucose3_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_glucose3_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_glucose3_from_file (PyObject *, PyObject *);
 	static PyObject *py_glucose3_solve     (PyObject *, PyObject *);
 	static PyObject *py_glucose3_solve_lim (PyObject *, PyObject *);
 	static PyObject *py_glucose3_propagate (PyObject *, PyObject *);
@@ -289,6 +303,8 @@ extern "C" {
 	static PyObject *py_glucose41_new       (PyObject *, PyObject *);
 	static PyObject *py_glucose41_set_start (PyObject *, PyObject *);
 	static PyObject *py_glucose41_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_glucose41_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_glucose41_from_file (PyObject *, PyObject *);
 	static PyObject *py_glucose41_solve     (PyObject *, PyObject *);
 	static PyObject *py_glucose41_solve_lim (PyObject *, PyObject *);
 	static PyObject *py_glucose41_propagate (PyObject *, PyObject *);
@@ -310,6 +326,8 @@ extern "C" {
 	static PyObject *py_glucose421_new                   (PyObject *, PyObject *);
 	static PyObject *py_glucose421_set_start             (PyObject *, PyObject *);
 	static PyObject *py_glucose421_add_cl                (PyObject *, PyObject *);
+	static PyObject *py_glucose421_add_cls               (PyObject *, PyObject *);
+	static PyObject *py_glucose421_from_file             (PyObject *, PyObject *);
 	static PyObject *py_glucose421_solve                 (PyObject *, PyObject *);
 	static PyObject *py_glucose421_solve_lim             (PyObject *, PyObject *);
 	static PyObject *py_glucose421_propagate             (PyObject *, PyObject *);
@@ -335,6 +353,8 @@ extern "C" {
 #ifdef WITH_LINGELING
 	static PyObject *py_lingeling_new       (PyObject *, PyObject *);
 	static PyObject *py_lingeling_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_lingeling_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_lingeling_from_file (PyObject *, PyObject *);
 	static PyObject *py_lingeling_solve     (PyObject *, PyObject *);
 	static PyObject *py_lingeling_setphases (PyObject *, PyObject *);
 	static PyObject *py_lingeling_tracepr   (PyObject *, PyObject *);
@@ -348,6 +368,8 @@ extern "C" {
 #ifdef WITH_MAPLECHRONO
 	static PyObject *py_maplechrono_new       (PyObject *, PyObject *);
 	static PyObject *py_maplechrono_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_maplechrono_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_maplechrono_from_file (PyObject *, PyObject *);
 	static PyObject *py_maplechrono_solve     (PyObject *, PyObject *);
 	static PyObject *py_maplechrono_solve_lim (PyObject *, PyObject *);
 	static PyObject *py_maplechrono_propagate (PyObject *, PyObject *);
@@ -368,6 +390,8 @@ extern "C" {
 	static PyObject *py_maplecm_new       (PyObject *, PyObject *);
 	static PyObject *py_maplecm_set_start (PyObject *, PyObject *);
 	static PyObject *py_maplecm_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_maplecm_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_maplecm_from_file (PyObject *, PyObject *);
 	static PyObject *py_maplecm_solve     (PyObject *, PyObject *);
 	static PyObject *py_maplecm_solve_lim (PyObject *, PyObject *);
 	static PyObject *py_maplecm_propagate (PyObject *, PyObject *);
@@ -388,6 +412,8 @@ extern "C" {
 	static PyObject *py_maplesat_new       (PyObject *, PyObject *);
 	static PyObject *py_maplesat_set_start (PyObject *, PyObject *);
 	static PyObject *py_maplesat_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_maplesat_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_maplesat_from_file (PyObject *, PyObject *);
 	static PyObject *py_maplesat_solve     (PyObject *, PyObject *);
 	static PyObject *py_maplesat_solve_lim (PyObject *, PyObject *);
 	static PyObject *py_maplesat_propagate (PyObject *, PyObject *);
@@ -407,6 +433,8 @@ extern "C" {
 #ifdef WITH_MERGESAT3
 	static PyObject *py_mergesat3_new       (PyObject *, PyObject *);
 	static PyObject *py_mergesat3_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_mergesat3_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_mergesat3_from_file (PyObject *, PyObject *);
 	static PyObject *py_mergesat3_solve     (PyObject *, PyObject *);
 	static PyObject *py_mergesat3_solve_lim (PyObject *, PyObject *);
 	static PyObject *py_mergesat3_propagate (PyObject *, PyObject *);
@@ -426,6 +454,8 @@ extern "C" {
 	static PyObject *py_minicard_new       (PyObject *, PyObject *);
 	static PyObject *py_minicard_set_start (PyObject *, PyObject *);
 	static PyObject *py_minicard_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_minicard_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_minicard_from_file (PyObject *, PyObject *);
 	static PyObject *py_minicard_add_am    (PyObject *, PyObject *);
 	static PyObject *py_minicard_solve     (PyObject *, PyObject *);
 	static PyObject *py_minicard_solve_lim (PyObject *, PyObject *);
@@ -446,6 +476,8 @@ extern "C" {
 	static PyObject *py_minisat22_new       (PyObject *, PyObject *);
 	static PyObject *py_minisat22_set_start (PyObject *, PyObject *);
 	static PyObject *py_minisat22_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_minisat22_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_minisat22_from_file (PyObject *, PyObject *);
 	static PyObject *py_minisat22_solve     (PyObject *, PyObject *);
 	static PyObject *py_minisat22_solve_lim (PyObject *, PyObject *);
 	static PyObject *py_minisat22_propagate (PyObject *, PyObject *);
@@ -465,6 +497,8 @@ extern "C" {
 	static PyObject *py_minisatgh_new       (PyObject *, PyObject *);
 	static PyObject *py_minisatgh_set_start (PyObject *, PyObject *);
 	static PyObject *py_minisatgh_add_cl    (PyObject *, PyObject *);
+	static PyObject *py_minisatgh_add_cls   (PyObject *, PyObject *);
+	static PyObject *py_minisatgh_from_file (PyObject *, PyObject *);
 	static PyObject *py_minisatgh_solve     (PyObject *, PyObject *);
 	static PyObject *py_minisatgh_solve_lim (PyObject *, PyObject *);
 	static PyObject *py_minisatgh_propagate (PyObject *, PyObject *);
@@ -488,6 +522,8 @@ static PyMethodDef module_methods[] = {
 #ifdef WITH_CADICAL103
 	{ "cadical103_new",       py_cadical103_new,       METH_VARARGS,      new_docstring },
 	{ "cadical103_add_cl",    py_cadical103_add_cl,    METH_VARARGS,    addcl_docstring },
+	{ "cadical103_add_cls",   py_cadical103_add_cls,   METH_VARARGS,   addcls_docstring },
+	{ "cadical103_from_file", py_cadical103_from_file, METH_VARARGS, fromfile_docstring },
 	{ "cadical103_solve",     py_cadical103_solve,     METH_VARARGS,    solve_docstring },
 	{ "cadical103_solve_lim", py_cadical103_solve_lim, METH_VARARGS,      lim_docstring },
 	{ "cadical103_cbudget",   py_cadical103_cbudget,   METH_VARARGS,  cbudget_docstring },
@@ -504,6 +540,8 @@ static PyMethodDef module_methods[] = {
 	{ "cadical153_new",       py_cadical153_new,       METH_VARARGS,      new_docstring },
 	{ "cadical153_set",       py_cadical153_set,       METH_VARARGS,      set_docstring },
 	{ "cadical153_add_cl",    py_cadical153_add_cl,    METH_VARARGS,    addcl_docstring },
+	{ "cadical153_add_cls",   py_cadical153_add_cls,   METH_VARARGS,   addcls_docstring },
+	{ "cadical153_from_file", py_cadical153_from_file, METH_VARARGS, fromfile_docstring },
 	{ "cadical153_solve",     py_cadical153_solve,     METH_VARARGS,    solve_docstring },
 	{ "cadical153_solve_lim", py_cadical153_solve_lim, METH_VARARGS,      lim_docstring },
 	{ "cadical153_propagate", py_cadical153_propagate, METH_VARARGS,     prop_docstring },
@@ -524,6 +562,8 @@ static PyMethodDef module_methods[] = {
 	{ "cadical195_new",       py_cadical195_new,       METH_VARARGS,      new_docstring },
 	{ "cadical195_set",       py_cadical195_set,       METH_VARARGS,      set_docstring },
 	{ "cadical195_add_cl",    py_cadical195_add_cl,    METH_VARARGS,    addcl_docstring },
+	{ "cadical195_add_cls",   py_cadical195_add_cls,   METH_VARARGS,   addcls_docstring },
+	{ "cadical195_from_file", py_cadical195_from_file, METH_VARARGS, fromfile_docstring },
 	{ "cadical195_solve",     py_cadical195_solve,     METH_VARARGS,    solve_docstring },
 	{ "cadical195_solve_lim", py_cadical195_solve_lim, METH_VARARGS,      lim_docstring },
 	{ "cadical195_propagate", py_cadical195_propagate, METH_VARARGS,     prop_docstring },
@@ -553,6 +593,8 @@ static PyMethodDef module_methods[] = {
 	{ "gluecard3_new",       py_gluecard3_new,       METH_VARARGS,       new_docstring },
 	{ "gluecard3_set_start", py_gluecard3_set_start, METH_VARARGS,  setstart_docstring },
 	{ "gluecard3_add_cl",    py_gluecard3_add_cl,    METH_VARARGS,     addcl_docstring },
+	{ "gluecard3_add_cls",   py_gluecard3_add_cls,   METH_VARARGS,    addcls_docstring },
+	{ "gluecard3_from_file", py_gluecard3_from_file, METH_VARARGS,  fromfile_docstring },
 	{ "gluecard3_add_am",    py_gluecard3_add_am,    METH_VARARGS,     addam_docstring },
 	{ "gluecard3_solve",     py_gluecard3_solve,     METH_VARARGS,     solve_docstring },
 	{ "gluecard3_solve_lim", py_gluecard3_solve_lim, METH_VARARGS,       lim_docstring },
@@ -575,6 +617,8 @@ static PyMethodDef module_methods[] = {
 	{ "gluecard41_new",       py_gluecard41_new,       METH_VARARGS,       new_docstring },
 	{ "gluecard41_set_start", py_gluecard41_set_start, METH_VARARGS,  setstart_docstring },
 	{ "gluecard41_add_cl",    py_gluecard41_add_cl,    METH_VARARGS,     addcl_docstring },
+	{ "gluecard41_add_cls",   py_gluecard41_add_cls,   METH_VARARGS,    addcls_docstring },
+	{ "gluecard41_from_file", py_gluecard41_from_file, METH_VARARGS,  fromfile_docstring },
 	{ "gluecard41_add_am",    py_gluecard41_add_am,    METH_VARARGS,     addam_docstring },
 	{ "gluecard41_solve",     py_gluecard41_solve,     METH_VARARGS,     solve_docstring },
 	{ "gluecard41_solve_lim", py_gluecard41_solve_lim, METH_VARARGS,       lim_docstring },
@@ -597,6 +641,8 @@ static PyMethodDef module_methods[] = {
 	{ "glucose3_new",       py_glucose3_new,       METH_VARARGS,       new_docstring },
 	{ "glucose3_set_start", py_glucose3_set_start, METH_VARARGS,  setstart_docstring },
 	{ "glucose3_add_cl",    py_glucose3_add_cl,    METH_VARARGS,     addcl_docstring },
+	{ "glucose3_add_cls",   py_glucose3_add_cls,   METH_VARARGS,    addcls_docstring },
+	{ "glucose3_from_file", py_glucose3_from_file, METH_VARARGS,  fromfile_docstring },
 	{ "glucose3_solve",     py_glucose3_solve,     METH_VARARGS,     solve_docstring },
 	{ "glucose3_solve_lim", py_glucose3_solve_lim, METH_VARARGS,       lim_docstring },
 	{ "glucose3_propagate", py_glucose3_propagate, METH_VARARGS,      prop_docstring },
@@ -618,6 +664,8 @@ static PyMethodDef module_methods[] = {
 	{ "glucose41_new",       py_glucose41_new,       METH_VARARGS,       new_docstring },
 	{ "glucose41_set_start", py_glucose41_set_start, METH_VARARGS,  setstart_docstring },
 	{ "glucose41_add_cl",    py_glucose41_add_cl,    METH_VARARGS,     addcl_docstring },
+	{ "glucose41_add_cls",   py_glucose41_add_cls,   METH_VARARGS,    addcls_docstring },
+	{ "glucose41_from_file", py_glucose41_from_file, METH_VARARGS,  fromfile_docstring },
 	{ "glucose41_solve",     py_glucose41_solve,     METH_VARARGS,     solve_docstring },
 	{ "glucose41_solve_lim", py_glucose41_solve_lim, METH_VARARGS,       lim_docstring },
 	{ "glucose41_propagate", py_glucose41_propagate, METH_VARARGS,      prop_docstring },
@@ -639,6 +687,8 @@ static PyMethodDef module_methods[] = {
 	{ "glucose421_new",                   py_glucose421_new,                   METH_VARARGS,                    new_docstring },
 	{ "glucose421_set_start",             py_glucose421_set_start,             METH_VARARGS,               setstart_docstring },
 	{ "glucose421_add_cl",                py_glucose421_add_cl,                METH_VARARGS,                  addcl_docstring },
+	{ "glucose421_add_cls",               py_glucose421_add_cls,               METH_VARARGS,                 addcls_docstring },
+	{ "glucose421_from_file",             py_glucose421_from_file,             METH_VARARGS,               fromfile_docstring },
 	{ "glucose421_solve",                 py_glucose421_solve,                 METH_VARARGS,                  solve_docstring },
 	{ "glucose421_solve_lim",             py_glucose421_solve_lim,             METH_VARARGS,                    lim_docstring },
 	{ "glucose421_propagate",             py_glucose421_propagate,             METH_VARARGS,                   prop_docstring },
@@ -664,6 +714,8 @@ static PyMethodDef module_methods[] = {
 #ifdef WITH_LINGELING
 	{ "lingeling_new",       py_lingeling_new,       METH_VARARGS,      new_docstring },
 	{ "lingeling_add_cl",    py_lingeling_add_cl,    METH_VARARGS,    addcl_docstring },
+	{ "lingeling_add_cls",   py_lingeling_add_cls,   METH_VARARGS,   addcls_docstring },
+	{ "lingeling_from_file", py_lingeling_from_file, METH_VARARGS, fromfile_docstring },
 	{ "lingeling_solve",     py_lingeling_solve,     METH_VARARGS,    solve_docstring },
 	{ "lingeling_setphases", py_lingeling_setphases, METH_VARARGS,   phases_docstring },
 	{ "lingeling_tracepr",   py_lingeling_tracepr,   METH_VARARGS,  tracepr_docstring },
@@ -677,6 +729,8 @@ static PyMethodDef module_methods[] = {
 #ifdef WITH_MAPLECHRONO
 	{ "maplechrono_new",       py_maplechrono_new,       METH_VARARGS,       new_docstring },
 	{ "maplechrono_add_cl",    py_maplechrono_add_cl,    METH_VARARGS,     addcl_docstring },
+	{ "maplechrono_add_cls",   py_maplechrono_add_cls,   METH_VARARGS,    addcls_docstring },
+	{ "maplechrono_from_file", py_maplechrono_from_file, METH_VARARGS,  fromfile_docstring },
 	{ "maplechrono_solve",     py_maplechrono_solve,     METH_VARARGS,     solve_docstring },
 	{ "maplechrono_solve_lim", py_maplechrono_solve_lim, METH_VARARGS,       lim_docstring },
 	{ "maplechrono_propagate", py_maplechrono_propagate, METH_VARARGS,      prop_docstring },
@@ -697,6 +751,8 @@ static PyMethodDef module_methods[] = {
 	{ "maplecm_new",       py_maplecm_new,       METH_VARARGS,       new_docstring },
 	{ "maplecm_set_start", py_maplecm_set_start, METH_VARARGS,  setstart_docstring },
 	{ "maplecm_add_cl",    py_maplecm_add_cl,    METH_VARARGS,     addcl_docstring },
+	{ "maplecm_add_cls",   py_maplecm_add_cls,   METH_VARARGS,    addcls_docstring },
+	{ "maplecm_from_file", py_maplecm_from_file, METH_VARARGS,  fromfile_docstring },
 	{ "maplecm_solve",     py_maplecm_solve,     METH_VARARGS,     solve_docstring },
 	{ "maplecm_solve_lim", py_maplecm_solve_lim, METH_VARARGS,       lim_docstring },
 	{ "maplecm_propagate", py_maplecm_propagate, METH_VARARGS,      prop_docstring },
@@ -717,6 +773,8 @@ static PyMethodDef module_methods[] = {
 	{ "maplesat_new",       py_maplesat_new,       METH_VARARGS,       new_docstring },
 	{ "maplesat_set_start", py_maplesat_set_start, METH_VARARGS,  setstart_docstring },
 	{ "maplesat_add_cl",    py_maplesat_add_cl,    METH_VARARGS,     addcl_docstring },
+	{ "maplesat_add_cls",   py_maplesat_add_cls,   METH_VARARGS,    addcls_docstring },
+	{ "maplesat_from_file", py_maplesat_from_file, METH_VARARGS,  fromfile_docstring },
 	{ "maplesat_solve",     py_maplesat_solve,     METH_VARARGS,     solve_docstring },
 	{ "maplesat_solve_lim", py_maplesat_solve_lim, METH_VARARGS,       lim_docstring },
 	{ "maplesat_propagate", py_maplesat_propagate, METH_VARARGS,      prop_docstring },
@@ -736,6 +794,8 @@ static PyMethodDef module_methods[] = {
 #ifdef WITH_MERGESAT3
 	{ "mergesat3_new",       py_mergesat3_new,       METH_VARARGS,       new_docstring },
 	{ "mergesat3_add_cl",    py_mergesat3_add_cl,    METH_VARARGS,     addcl_docstring },
+	{ "mergesat3_add_cls",   py_mergesat3_add_cls,   METH_VARARGS,    addcls_docstring },
+	{ "mergesat3_from_file", py_mergesat3_from_file, METH_VARARGS,  fromfile_docstring },
 	{ "mergesat3_solve",     py_mergesat3_solve,     METH_VARARGS,     solve_docstring },
 	{ "mergesat3_solve_lim", py_mergesat3_solve_lim, METH_VARARGS,       lim_docstring },
 	{ "mergesat3_propagate", py_mergesat3_propagate, METH_VARARGS,      prop_docstring },
@@ -755,6 +815,8 @@ static PyMethodDef module_methods[] = {
 	{ "minicard_new",       py_minicard_new,       METH_VARARGS,       new_docstring },
 	{ "minicard_set_start", py_minicard_set_start, METH_VARARGS,  setstart_docstring },
 	{ "minicard_add_cl",    py_minicard_add_cl,    METH_VARARGS,     addcl_docstring },
+	{ "minicard_add_cls",   py_minicard_add_cls,   METH_VARARGS,    addcls_docstring },
+	{ "minicard_from_file", py_minicard_from_file, METH_VARARGS,  fromfile_docstring },
 	{ "minicard_solve",     py_minicard_solve,     METH_VARARGS,     solve_docstring },
 	{ "minicard_solve_lim", py_minicard_solve_lim, METH_VARARGS,       lim_docstring },
 	{ "minicard_propagate", py_minicard_propagate, METH_VARARGS,      prop_docstring },
@@ -775,6 +837,8 @@ static PyMethodDef module_methods[] = {
 	{ "minisat22_new",       py_minisat22_new,       METH_VARARGS,       new_docstring },
 	{ "minisat22_set_start", py_minisat22_set_start, METH_VARARGS,  setstart_docstring },
 	{ "minisat22_add_cl",    py_minisat22_add_cl,    METH_VARARGS,     addcl_docstring },
+	{ "minisat22_add_cls",   py_minisat22_add_cls,   METH_VARARGS,    addcls_docstring },
+	{ "minisat22_from_file", py_minisat22_from_file, METH_VARARGS,  fromfile_docstring },
 	{ "minisat22_solve",     py_minisat22_solve,     METH_VARARGS,     solve_docstring },
 	{ "minisat22_solve_lim", py_minisat22_solve_lim, METH_VARARGS,       lim_docstring },
 	{ "minisat22_propagate", py_minisat22_propagate, METH_VARARGS,      prop_docstring },
@@ -794,6 +858,8 @@ static PyMethodDef module_methods[] = {
 	{ "minisatgh_new",       py_minisatgh_new,       METH_VARARGS,       new_docstring },
 	{ "minisatgh_set_start", py_minisatgh_set_start, METH_VARARGS,  setstart_docstring },
 	{ "minisatgh_add_cl",    py_minisatgh_add_cl,    METH_VARARGS,     addcl_docstring },
+	{ "minisatgh_add_cls",   py_minisatgh_add_cls,   METH_VARARGS,    addcls_docstring },
+	{ "minisatgh_from_file", py_minisatgh_from_file, METH_VARARGS,  fromfile_docstring },
 	{ "minisatgh_solve",     py_minisatgh_solve,     METH_VARARGS,     solve_docstring },
 	{ "minisatgh_solve_lim", py_minisatgh_solve_lim, METH_VARARGS,       lim_docstring },
 	{ "minisatgh_propagate", py_minisatgh_propagate, METH_VARARGS,      prop_docstring },
@@ -939,6 +1005,44 @@ PyMODINIT_FUNC initpysolvers(void)
 	PyModule_AddObject(m, "error", SATError);
 }
 #endif
+
+// shared DIMACS file parser
+//=============================================================================
+static int *parse_dimacs_file(const char *fname, int *out_count)
+{
+	FILE *fp = fopen(fname, "r");
+	if (!fp)
+		return NULL;
+
+	int capacity = 65536;
+	int *lits = (int *)malloc(capacity * sizeof(int));
+	int n = 0;
+
+	char buf[16384];
+	while (fgets(buf, sizeof(buf), fp)) {
+		if (buf[0] == 'c' || buf[0] == 'p' || buf[0] == '%' ||
+		    buf[0] == '\n' || buf[0] == '\r' || buf[0] == '\0')
+			continue;
+
+		char *ptr = buf, *end;
+		while (1) {
+			long l = strtol(ptr, &end, 10);
+			if (ptr == end)
+				break;
+			ptr = end;
+
+			if (n >= capacity) {
+				capacity *= 2;
+				lits = (int *)realloc(lits, capacity * sizeof(int));
+			}
+			lits[n++] = (int)l;
+		}
+	}
+
+	fclose(fp);
+	*out_count = n;
+	return lits;
+}
 
 // auxiliary function for translating an iterable to a vector<int>
 //=============================================================================
@@ -1101,6 +1205,98 @@ static PyObject *py_cadical103_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_cadical103_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	CaDiCaL103::Solver *s = (CaDiCaL103::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		PyObject *l_iter = PyObject_GetIter(c_obj);
+		if (l_iter == NULL) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			PyErr_SetString(PyExc_RuntimeError,
+					"Clause does not seem to be an iterable object.");
+			return NULL;
+		}
+
+		PyObject *l_obj;
+		while ((l_obj = PyIter_Next(l_iter)) != NULL) {
+			if (!pyint_check(l_obj)) {
+				Py_DECREF(l_obj);
+				Py_DECREF(l_iter);
+				Py_DECREF(c_obj);
+				Py_DECREF(cls_iter);
+				PyErr_SetString(PyExc_TypeError, "integer expected");
+				return NULL;
+			}
+
+			int l = pyint_to_cint(l_obj);
+			Py_DECREF(l_obj);
+
+			if (l == 0) {
+				Py_DECREF(l_iter);
+				Py_DECREF(c_obj);
+				Py_DECREF(cls_iter);
+				PyErr_SetString(PyExc_ValueError, "non-zero integer expected");
+				return NULL;
+			}
+
+			s->add(l);
+		}
+
+		s->add(0);
+		Py_DECREF(l_iter);
+		Py_DECREF(c_obj);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_cadical103_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	CaDiCaL103::Solver *s = (CaDiCaL103::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	for (int i = 0; i < count; i++)
+		s->add(lits[i]);
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_cadical103_tracepr(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -1194,7 +1390,15 @@ static PyObject *py_cadical103_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve() == 10 ? true : false;
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve() == 10 ? true : false;
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve() == 10 ? true : false;
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -1258,7 +1462,15 @@ static PyObject *py_cadical103_solve_lim(PyObject *self, PyObject *args)
 		}
 	}
 
-	int res = s->solve();
+	int res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve();
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve();
+	}
 	res = (res == 10 ? 1 : (res == 20 ? -1 : 0));
 
 	if (main_thread)
@@ -1558,6 +1770,98 @@ static PyObject *py_cadical153_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_cadical153_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	CaDiCaL153::Solver *s = (CaDiCaL153::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		PyObject *l_iter = PyObject_GetIter(c_obj);
+		if (l_iter == NULL) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			PyErr_SetString(PyExc_RuntimeError,
+					"Clause does not seem to be an iterable object.");
+			return NULL;
+		}
+
+		PyObject *l_obj;
+		while ((l_obj = PyIter_Next(l_iter)) != NULL) {
+			if (!pyint_check(l_obj)) {
+				Py_DECREF(l_obj);
+				Py_DECREF(l_iter);
+				Py_DECREF(c_obj);
+				Py_DECREF(cls_iter);
+				PyErr_SetString(PyExc_TypeError, "integer expected");
+				return NULL;
+			}
+
+			int l = pyint_to_cint(l_obj);
+			Py_DECREF(l_obj);
+
+			if (l == 0) {
+				Py_DECREF(l_iter);
+				Py_DECREF(c_obj);
+				Py_DECREF(cls_iter);
+				PyErr_SetString(PyExc_ValueError, "non-zero integer expected");
+				return NULL;
+			}
+
+			s->add(l);
+		}
+
+		s->add(0);
+		Py_DECREF(l_iter);
+		Py_DECREF(c_obj);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_cadical153_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	CaDiCaL153::Solver *s = (CaDiCaL153::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	for (int i = 0; i < count; i++)
+		s->add(lits[i]);
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_cadical153_tracepr(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -1787,7 +2091,15 @@ static PyObject *py_cadical153_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve() == 10 ? true : false;
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve() == 10 ? true : false;
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve() == 10 ? true : false;
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -1851,7 +2163,15 @@ static PyObject *py_cadical153_solve_lim(PyObject *self, PyObject *args)
 		}
 	}
 
-	int res = s->solve();
+	int res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve();
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve();
+	}
 	res = (res == 10 ? 1 : (res == 20 ? -1 : 0));
 
 	if (main_thread)
@@ -2250,6 +2570,98 @@ static PyObject *py_cadical195_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_cadical195_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	CaDiCaL195::Solver *s = (CaDiCaL195::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		PyObject *l_iter = PyObject_GetIter(c_obj);
+		if (l_iter == NULL) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			PyErr_SetString(PyExc_RuntimeError,
+					"Clause does not seem to be an iterable object.");
+			return NULL;
+		}
+
+		PyObject *l_obj;
+		while ((l_obj = PyIter_Next(l_iter)) != NULL) {
+			if (!pyint_check(l_obj)) {
+				Py_DECREF(l_obj);
+				Py_DECREF(l_iter);
+				Py_DECREF(c_obj);
+				Py_DECREF(cls_iter);
+				PyErr_SetString(PyExc_TypeError, "integer expected");
+				return NULL;
+			}
+
+			int l = pyint_to_cint(l_obj);
+			Py_DECREF(l_obj);
+
+			if (l == 0) {
+				Py_DECREF(l_iter);
+				Py_DECREF(c_obj);
+				Py_DECREF(cls_iter);
+				PyErr_SetString(PyExc_ValueError, "non-zero integer expected");
+				return NULL;
+			}
+
+			s->add(l);
+		}
+
+		s->add(0);
+		Py_DECREF(l_iter);
+		Py_DECREF(c_obj);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_cadical195_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	CaDiCaL195::Solver *s = (CaDiCaL195::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	for (int i = 0; i < count; i++)
+		s->add(lits[i]);
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_cadical195_tracepr(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -2479,7 +2891,15 @@ static PyObject *py_cadical195_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve() == 10 ? true : false;
+	bool res;
+	if (!main_thread && !s->get_external_propagator()) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve() == 10 ? true : false;
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve() == 10 ? true : false;
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -2543,7 +2963,15 @@ static PyObject *py_cadical195_solve_lim(PyObject *self, PyObject *args)
 		}
 	}
 
-	int res = s->solve();
+	int res;
+	if (!main_thread && !s->get_external_propagator()) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve();
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve();
+	}
 	res = (res == 10 ? 1 : (res == 20 ? -1 : 0));
 
 	if (main_thread)
@@ -3680,6 +4108,93 @@ static PyObject *py_gluecard3_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_gluecard3_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	Gluecard30::Solver *s = (Gluecard30::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		Gluecard30::vec<Gluecard30::Lit> cl;
+		int max_var = -1;
+
+		if (gluecard3_iterate(c_obj, cl, max_var) == false) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			return NULL;
+		}
+
+		Py_DECREF(c_obj);
+
+		if (max_var > 0)
+			gluecard3_declare_vars(s, max_var);
+
+		s->addClause(cl);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_gluecard3_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	Gluecard30::Solver *s = (Gluecard30::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	Gluecard30::vec<Gluecard30::Lit> cl;
+	int max_var = -1;
+
+	for (int i = 0; i < count; i++) {
+		if (lits[i] == 0) {
+			if (max_var > 0)
+				gluecard3_declare_vars(s, max_var);
+			s->addClause(cl);
+			cl.clear();
+			max_var = -1;
+		}
+		else {
+			int var = abs(lits[i]);
+			if (var > max_var)
+				max_var = var;
+			cl.push((lits[i] > 0) ? Gluecard30::mkLit(var, false)
+			                      : Gluecard30::mkLit(var, true));
+		}
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_gluecard3_add_am(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -3738,7 +4253,15 @@ static PyObject *py_gluecard3_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve(a);
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve(a);
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve(a);
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -4281,6 +4804,93 @@ static PyObject *py_gluecard41_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_gluecard41_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	Gluecard41::Solver *s = (Gluecard41::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		Gluecard41::vec<Gluecard41::Lit> cl;
+		int max_var = -1;
+
+		if (gluecard41_iterate(c_obj, cl, max_var) == false) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			return NULL;
+		}
+
+		Py_DECREF(c_obj);
+
+		if (max_var > 0)
+			gluecard41_declare_vars(s, max_var);
+
+		s->addClause(cl);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_gluecard41_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	Gluecard41::Solver *s = (Gluecard41::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	Gluecard41::vec<Gluecard41::Lit> cl;
+	int max_var = -1;
+
+	for (int i = 0; i < count; i++) {
+		if (lits[i] == 0) {
+			if (max_var > 0)
+				gluecard41_declare_vars(s, max_var);
+			s->addClause(cl);
+			cl.clear();
+			max_var = -1;
+		}
+		else {
+			int var = abs(lits[i]);
+			if (var > max_var)
+				max_var = var;
+			cl.push((lits[i] > 0) ? Gluecard41::mkLit(var, false)
+			                      : Gluecard41::mkLit(var, true));
+		}
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_gluecard41_add_am(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -4339,7 +4949,15 @@ static PyObject *py_gluecard41_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve(a);
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve(a);
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve(a);
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -4882,6 +5500,93 @@ static PyObject *py_glucose3_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_glucose3_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	Glucose30::Solver *s = (Glucose30::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		Glucose30::vec<Glucose30::Lit> cl;
+		int max_var = -1;
+
+		if (glucose3_iterate(c_obj, cl, max_var) == false) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			return NULL;
+		}
+
+		Py_DECREF(c_obj);
+
+		if (max_var > 0)
+			glucose3_declare_vars(s, max_var);
+
+		s->addClause(cl);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_glucose3_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	Glucose30::Solver *s = (Glucose30::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	Glucose30::vec<Glucose30::Lit> cl;
+	int max_var = -1;
+
+	for (int i = 0; i < count; i++) {
+		if (lits[i] == 0) {
+			if (max_var > 0)
+				glucose3_declare_vars(s, max_var);
+			s->addClause(cl);
+			cl.clear();
+			max_var = -1;
+		}
+		else {
+			int var = abs(lits[i]);
+			if (var > max_var)
+				max_var = var;
+			cl.push((lits[i] > 0) ? Glucose30::mkLit(var, false)
+			                      : Glucose30::mkLit(var, true));
+		}
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_glucose3_solve(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -4912,7 +5617,15 @@ static PyObject *py_glucose3_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve(a);
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve(a);
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve(a);
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -5455,6 +6168,93 @@ static PyObject *py_glucose41_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_glucose41_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	Glucose41::Solver *s = (Glucose41::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		Glucose41::vec<Glucose41::Lit> cl;
+		int max_var = -1;
+
+		if (glucose41_iterate(c_obj, cl, max_var) == false) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			return NULL;
+		}
+
+		Py_DECREF(c_obj);
+
+		if (max_var > 0)
+			glucose41_declare_vars(s, max_var);
+
+		s->addClause(cl);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_glucose41_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	Glucose41::Solver *s = (Glucose41::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	Glucose41::vec<Glucose41::Lit> cl;
+	int max_var = -1;
+
+	for (int i = 0; i < count; i++) {
+		if (lits[i] == 0) {
+			if (max_var > 0)
+				glucose41_declare_vars(s, max_var);
+			s->addClause(cl);
+			cl.clear();
+			max_var = -1;
+		}
+		else {
+			int var = abs(lits[i]);
+			if (var > max_var)
+				max_var = var;
+			cl.push((lits[i] > 0) ? Glucose41::mkLit(var, false)
+			                      : Glucose41::mkLit(var, true));
+		}
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_glucose41_solve(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -5485,7 +6285,15 @@ static PyObject *py_glucose41_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve(a);
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve(a);
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve(a);
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -6028,6 +6836,93 @@ static PyObject *py_glucose421_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_glucose421_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	Glucose421::Solver *s = (Glucose421::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		Glucose421::vec<Glucose421::Lit> cl;
+		int max_var = -1;
+
+		if (glucose421_iterate(c_obj, cl, max_var) == false) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			return NULL;
+		}
+
+		Py_DECREF(c_obj);
+
+		if (max_var > 0)
+			glucose421_declare_vars(s, max_var);
+
+		s->addClause(cl);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_glucose421_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	Glucose421::Solver *s = (Glucose421::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	Glucose421::vec<Glucose421::Lit> cl;
+	int max_var = -1;
+
+	for (int i = 0; i < count; i++) {
+		if (lits[i] == 0) {
+			if (max_var > 0)
+				glucose421_declare_vars(s, max_var);
+			s->addClause(cl);
+			cl.clear();
+			max_var = -1;
+		}
+		else {
+			int var = abs(lits[i]);
+			if (var > max_var)
+				max_var = var;
+			cl.push((lits[i] > 0) ? Glucose421::mkLit(var, false)
+			                      : Glucose421::mkLit(var, true));
+		}
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_glucose421_solve(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -6058,7 +6953,15 @@ static PyObject *py_glucose421_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve(a);
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve(a);
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve(a);
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -6646,6 +7549,102 @@ static PyObject *py_lingeling_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_lingeling_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	LGL *s = (LGL *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		PyObject *l_iter = PyObject_GetIter(c_obj);
+		if (l_iter == NULL) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			PyErr_SetString(PyExc_RuntimeError,
+					"Clause does not seem to be an iterable object.");
+			return NULL;
+		}
+
+		PyObject *l_obj;
+		while ((l_obj = PyIter_Next(l_iter)) != NULL) {
+			if (!pyint_check(l_obj)) {
+				Py_DECREF(l_obj);
+				Py_DECREF(l_iter);
+				Py_DECREF(c_obj);
+				Py_DECREF(cls_iter);
+				PyErr_SetString(PyExc_TypeError, "integer expected");
+				return NULL;
+			}
+
+			int l = pyint_to_cint(l_obj);
+			Py_DECREF(l_obj);
+
+			if (l == 0) {
+				Py_DECREF(l_iter);
+				Py_DECREF(c_obj);
+				Py_DECREF(cls_iter);
+				PyErr_SetString(PyExc_ValueError, "non-zero integer expected");
+				return NULL;
+			}
+
+			lgladd(s, l);
+			lglfreeze(s, abs(l));
+		}
+
+		lgladd(s, 0);
+		Py_DECREF(l_iter);
+		Py_DECREF(c_obj);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_lingeling_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	LGL *s = (LGL *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	for (int i = 0; i < count; i++) {
+		lgladd(s, lits[i]);
+		if (lits[i] != 0)
+			lglfreeze(s, abs(lits[i]));
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_lingeling_tracepr(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -6741,7 +7740,15 @@ static PyObject *py_lingeling_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = lglsat(s) == 10 ? true : false;
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = lglsat(s) == 10 ? true : false;
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = lglsat(s) == 10 ? true : false;
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -7050,6 +8057,93 @@ static PyObject *py_maplechrono_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_maplechrono_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	MapleChrono::Solver *s = (MapleChrono::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		MapleChrono::vec<MapleChrono::Lit> cl;
+		int max_var = -1;
+
+		if (maplechrono_iterate(c_obj, cl, max_var) == false) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			return NULL;
+		}
+
+		Py_DECREF(c_obj);
+
+		if (max_var > 0)
+			maplechrono_declare_vars(s, max_var);
+
+		s->addClause(cl);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_maplechrono_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	MapleChrono::Solver *s = (MapleChrono::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	MapleChrono::vec<MapleChrono::Lit> cl;
+	int max_var = -1;
+
+	for (int i = 0; i < count; i++) {
+		if (lits[i] == 0) {
+			if (max_var > 0)
+				maplechrono_declare_vars(s, max_var);
+			s->addClause(cl);
+			cl.clear();
+			max_var = -1;
+		}
+		else {
+			int var = abs(lits[i]);
+			if (var > max_var)
+				max_var = var;
+			cl.push((lits[i] > 0) ? MapleChrono::mkLit(var, false)
+			                      : MapleChrono::mkLit(var, true));
+		}
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_maplechrono_solve(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -7080,7 +8174,15 @@ static PyObject *py_maplechrono_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve(a);
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve(a);
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve(a);
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -7607,6 +8709,93 @@ static PyObject *py_maplesat_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_maplesat_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	Maplesat::Solver *s = (Maplesat::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		Maplesat::vec<Maplesat::Lit> cl;
+		int max_var = -1;
+
+		if (maplesat_iterate(c_obj, cl, max_var) == false) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			return NULL;
+		}
+
+		Py_DECREF(c_obj);
+
+		if (max_var > 0)
+			maplesat_declare_vars(s, max_var);
+
+		s->addClause(cl);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_maplesat_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	Maplesat::Solver *s = (Maplesat::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	Maplesat::vec<Maplesat::Lit> cl;
+	int max_var = -1;
+
+	for (int i = 0; i < count; i++) {
+		if (lits[i] == 0) {
+			if (max_var > 0)
+				maplesat_declare_vars(s, max_var);
+			s->addClause(cl);
+			cl.clear();
+			max_var = -1;
+		}
+		else {
+			int var = abs(lits[i]);
+			if (var > max_var)
+				max_var = var;
+			cl.push((lits[i] > 0) ? Maplesat::mkLit(var, false)
+			                      : Maplesat::mkLit(var, true));
+		}
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_maplesat_solve(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -7637,7 +8826,15 @@ static PyObject *py_maplesat_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve(a);
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve(a);
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve(a);
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -8164,6 +9361,93 @@ static PyObject *py_maplecm_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_maplecm_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	MapleCM::Solver *s = (MapleCM::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		MapleCM::vec<MapleCM::Lit> cl;
+		int max_var = -1;
+
+		if (maplecm_iterate(c_obj, cl, max_var) == false) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			return NULL;
+		}
+
+		Py_DECREF(c_obj);
+
+		if (max_var > 0)
+			maplecm_declare_vars(s, max_var);
+
+		s->addClause(cl);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_maplecm_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	MapleCM::Solver *s = (MapleCM::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	MapleCM::vec<MapleCM::Lit> cl;
+	int max_var = -1;
+
+	for (int i = 0; i < count; i++) {
+		if (lits[i] == 0) {
+			if (max_var > 0)
+				maplecm_declare_vars(s, max_var);
+			s->addClause(cl);
+			cl.clear();
+			max_var = -1;
+		}
+		else {
+			int var = abs(lits[i]);
+			if (var > max_var)
+				max_var = var;
+			cl.push((lits[i] > 0) ? MapleCM::mkLit(var, false)
+			                      : MapleCM::mkLit(var, true));
+		}
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_maplecm_solve(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -8194,7 +9478,15 @@ static PyObject *py_maplecm_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve(a);
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve(a);
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve(a);
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -8700,6 +9992,93 @@ static PyObject *py_mergesat3_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_mergesat3_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	MergeSat3::Solver *s = (MergeSat3::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		MergeSat3::vec<MergeSat3::Lit> cl;
+		int max_var = -1;
+
+		if (mergesat3_iterate(c_obj, cl, max_var) == false) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			return NULL;
+		}
+
+		Py_DECREF(c_obj);
+
+		if (max_var > 0)
+			mergesat3_declare_vars(s, max_var);
+
+		s->addClause(cl);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_mergesat3_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	MergeSat3::Solver *s = (MergeSat3::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	MergeSat3::vec<MergeSat3::Lit> cl;
+	int max_var = -1;
+
+	for (int i = 0; i < count; i++) {
+		if (lits[i] == 0) {
+			if (max_var > 0)
+				mergesat3_declare_vars(s, max_var);
+			s->addClause(cl);
+			cl.clear();
+			max_var = -1;
+		}
+		else {
+			int var = abs(lits[i]);
+			if (var > max_var)
+				max_var = var;
+			cl.push((lits[i] > 0) ? MergeSat3::mkLit(var, false)
+			                      : MergeSat3::mkLit(var, true));
+		}
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_mergesat3_solve(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -8730,7 +10109,15 @@ static PyObject *py_mergesat3_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve(a);
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve(a);
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve(a);
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -9205,6 +10592,93 @@ static PyObject *py_minicard_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_minicard_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	Minicard::Solver *s = (Minicard::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		Minicard::vec<Minicard::Lit> cl;
+		int max_var = -1;
+
+		if (minicard_iterate(c_obj, cl, max_var) == false) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			return NULL;
+		}
+
+		Py_DECREF(c_obj);
+
+		if (max_var > 0)
+			minicard_declare_vars(s, max_var);
+
+		s->addClause(cl);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_minicard_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	Minicard::Solver *s = (Minicard::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	Minicard::vec<Minicard::Lit> cl;
+	int max_var = -1;
+
+	for (int i = 0; i < count; i++) {
+		if (lits[i] == 0) {
+			if (max_var > 0)
+				minicard_declare_vars(s, max_var);
+			s->addClause(cl);
+			cl.clear();
+			max_var = -1;
+		}
+		else {
+			int var = abs(lits[i]);
+			if (var > max_var)
+				max_var = var;
+			cl.push((lits[i] > 0) ? Minicard::mkLit(var, false)
+			                      : Minicard::mkLit(var, true));
+		}
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_minicard_add_am(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -9263,7 +10737,15 @@ static PyObject *py_minicard_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve(a);
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve(a);
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve(a);
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -9738,6 +11220,93 @@ static PyObject *py_minisat22_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_minisat22_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	Minisat22::Solver *s = (Minisat22::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		Minisat22::vec<Minisat22::Lit> cl;
+		int max_var = -1;
+
+		if (minisat22_iterate(c_obj, cl, max_var) == false) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			return NULL;
+		}
+
+		Py_DECREF(c_obj);
+
+		if (max_var > 0)
+			minisat22_declare_vars(s, max_var);
+
+		s->addClause(cl);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_minisat22_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	Minisat22::Solver *s = (Minisat22::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	Minisat22::vec<Minisat22::Lit> cl;
+	int max_var = -1;
+
+	for (int i = 0; i < count; i++) {
+		if (lits[i] == 0) {
+			if (max_var > 0)
+				minisat22_declare_vars(s, max_var);
+			s->addClause(cl);
+			cl.clear();
+			max_var = -1;
+		}
+		else {
+			int var = abs(lits[i]);
+			if (var > max_var)
+				max_var = var;
+			cl.push((lits[i] > 0) ? Minisat22::mkLit(var, false)
+			                      : Minisat22::mkLit(var, true));
+		}
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_minisat22_solve(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -9768,7 +11337,15 @@ static PyObject *py_minisat22_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve(a);
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve(a);
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve(a);
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
@@ -10243,6 +11820,93 @@ static PyObject *py_minisatgh_add_cl(PyObject *self, PyObject *args)
 
 //
 //=============================================================================
+static PyObject *py_minisatgh_add_cls(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	PyObject *cls_obj;
+
+	if (!PyArg_ParseTuple(args, "OO", &s_obj, &cls_obj))
+		return NULL;
+
+	MinisatGH::Solver *s = (MinisatGH::Solver *)pyobj_to_void(s_obj);
+
+	PyObject *cls_iter = PyObject_GetIter(cls_obj);
+	if (cls_iter == NULL) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"Object does not seem to be an iterable.");
+		return NULL;
+	}
+
+	PyObject *c_obj;
+	while ((c_obj = PyIter_Next(cls_iter)) != NULL) {
+		MinisatGH::vec<MinisatGH::Lit> cl;
+		int max_var = -1;
+
+		if (minisatgh_iterate(c_obj, cl, max_var) == false) {
+			Py_DECREF(c_obj);
+			Py_DECREF(cls_iter);
+			return NULL;
+		}
+
+		Py_DECREF(c_obj);
+
+		if (max_var > 0)
+			minisatgh_declare_vars(s, max_var);
+
+		s->addClause(cl);
+	}
+
+	Py_DECREF(cls_iter);
+
+	PyObject *ret = PyBool_FromLong((long)true);
+	return ret;
+}
+
+//
+//=============================================================================
+static PyObject *py_minisatgh_from_file(PyObject *self, PyObject *args)
+{
+	PyObject *s_obj;
+	const char *fname;
+
+	if (!PyArg_ParseTuple(args, "Os", &s_obj, &fname))
+		return NULL;
+
+	MinisatGH::Solver *s = (MinisatGH::Solver *)pyobj_to_void(s_obj);
+
+	int count;
+	int *lits = parse_dimacs_file(fname, &count);
+	if (!lits) {
+		PyErr_Format(PyExc_IOError, "Cannot open file: %s", fname);
+		return NULL;
+	}
+
+	MinisatGH::vec<MinisatGH::Lit> cl;
+	int max_var = -1;
+
+	for (int i = 0; i < count; i++) {
+		if (lits[i] == 0) {
+			if (max_var > 0)
+				minisatgh_declare_vars(s, max_var);
+			s->addClause(cl);
+			cl.clear();
+			max_var = -1;
+		}
+		else {
+			int var = abs(lits[i]);
+			if (var > max_var)
+				max_var = var;
+			cl.push((lits[i] > 0) ? MinisatGH::mkLit(var, false)
+			                      : MinisatGH::mkLit(var, true));
+		}
+	}
+
+	free(lits);
+	Py_RETURN_TRUE;
+}
+
+//
+//=============================================================================
 static PyObject *py_minisatgh_solve(PyObject *self, PyObject *args)
 {
 	PyObject *s_obj;
@@ -10273,7 +11937,15 @@ static PyObject *py_minisatgh_solve(PyObject *self, PyObject *args)
 		}
 	}
 
-	bool res = s->solve(a);
+	bool res;
+	if (!main_thread) {
+		Py_BEGIN_ALLOW_THREADS
+		res = s->solve(a);
+		Py_END_ALLOW_THREADS
+	}
+	else {
+		res = s->solve(a);
+	}
 
 	if (main_thread)
 		PyOS_setsig(SIGINT, sig_save);
