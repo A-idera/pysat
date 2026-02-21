@@ -28,3 +28,10 @@ solvers/minisatgh
 temp
 web/.hugo_build.lock
 wheelhouse
+
+# AI agent configurations
+.claude/
+.codex/
+.gemini/
+CLAUDE.md
+.workers/
